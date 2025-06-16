@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickDial - QR Code Generator for parking contact calling</title>
+    <meta name="description" content="Generate QR codes for easy parking contact in Bangladesh. No more unclear handwritten numbers. Others can scan your QR code to call you directly when your car blocks their path.">
+    
+    <!-- Google Analytics Placeholder -->
+    <!-- GA_TRACKING_CODE_PLACEHOLDER -->
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel=icon href="qrcode-solid.svg">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header Section -->
+        <!-- <div class="section-box header-section">
+            <h1 class="brand-title"><i class="fas fa-qrcode"></i> QuickDial</h1>
+            <p class="brand-subtitle">QR Code Generator for calling</p>
+        </div> -->
+
+        <!-- Form Section -->
+        <div class="section-box form-section">
+            <div class="section-box header-section">
+                <h1 class="brand-title"><i class="fas fa-qrcode"></i> QuickDial</h1>
+                <p class="brand-subtitle">QR Code Generator for parking contact calling</p>
+            </div>
+            <!-- <h2 class="form-title">Generate Your QR Code</h2> -->
+
+            <!-- Instructions Section -->
+            <div class="section-box instructions-section">
+                <div class="instructions-toggle">
+                    <button class="btn btn-outline" onclick="toggleInstructions()">
+                        <i class="fas fa-question-circle"></i> How to Use This App
+                    </button>
+                </div>
+                
+                <div class="instructions-content" id="instructions">
+                    
+                    <div class="instructions-grid">
+                        <div>
+                            <h3><i class="fas fa-lightbulb"></i> Step-by-Step Instructions</h3>
+                            <ol class="instructions-list">
+                                <li><strong>Enter Phone Number:</strong> Type your mobile number in any format</li>
+                                <li><strong>Add Name (Optional):</strong> Include your name for personal touch</li>
+                                <li><strong>Generate QR Code:</strong> Click the blue button to create your QR</li>
+                                <li><strong>Download PDF:</strong> Get a printable version for your car</li>
+                                <li><strong>Email PDF:</strong> Email the PDF for printing</li>
+                                <li><strong>Placement:</strong> Place or paste it on your car's windshield where it's visible</li>
+                            </ol>
+                        </div>
+                        <div>
+                            <div class="alert alert-info">
+                                <strong><i class="fas fa-car"></i> Perfect for Bangladesh Parking!</strong><br>
+                                No more unclear handwritten numbers. Others can scan your QR code to call you directly when your car blocks their path.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <form id="qrForm">
+                <div class="form-group">
+                    <label for="phoneNumber" class="form-label">
+                        <i class="fas fa-phone"></i> Phone Number *
+                    </label>
+                    <input type="tel" class="form-control" id="phoneNumber" 
+                           placeholder="01XXXXXXXXX or +8801XXXXXXXXX" required>
+                    <div class="form-text">Enter your phone number in any format - the rest will be handled</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="name" class="form-label">
+                        <i class="fas fa-user"></i> Name (Optional)
+                    </label>
+                    <input type="text" class="form-control" id="name" 
+                           placeholder="Your name">
+                    <div class="form-text">Adding your name makes it more personal and professional</div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-large btn-full" id="generateBtn">
+                    <i class="fas fa-qrcode"></i> Generate QR Code
+                </button>
+            </form>
+        </div>
+
+        <!-- Result Section -->
+        <div class="section-box result-section" id="resultSection">
+            <div class="result-header">
+                <h2 class="result-title"><i class="fas fa-check-circle"></i> QR Code Generated Successfully!</h2>
+            </div>
+            
+            <div class="qr-display">
+                <div class="qr-container" id="qrcode"></div>
+            </div>
+            
+            <div id="qrInfo"></div>
+            
+            <div class="action-buttons">
+                <button id="downloadPdf" class="btn btn-success btn-large">
+                    <i class="fas fa-download"></i> Download PDF
+                </button>
+                <button id="emailBtn" class="btn btn-info btn-large" onclick="openEmailModal()">
+                    <i class="fas fa-envelope"></i> Email PDF
+                </button>
+                <button id="generateNew" class="btn btn-outline btn-large" onclick="generateNew()">
+                    <i class="fas fa-plus"></i> Generate New
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="section-box footer-section">
+            <p> <i><u>QuickDial.github.io</u></i> might make us smarter if we use it properly</p>
+            <!-- <p><strong>Visit:</strong> QuickDial.github.io</p> -->
+        </div>
+    </div>
+
+    <!-- Email Modal -->
+    <div class="modal-overlay" id="emailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-envelope"></i> Send QR Code via Email</h3>
+                <button class="modal-close" onclick="closeEmailModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="emailAddress" class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="emailAddress" 
+                           placeholder="recipient@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="emailMessage" class="form-label">Message (Optional)</label>
+                    <textarea class="form-control" id="emailMessage" rows="4" 
+                              placeholder="Your QR code for easy parking contact is attached."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeEmailModal()">Cancel</button>
+                <button class="btn btn-primary" id="sendEmailBtn" onclick="sendEmail()">
+                    <i class="fas fa-paper-plane"></i> Send Email
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+    <script src="https://smtpjs.com/v3/smtp.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
