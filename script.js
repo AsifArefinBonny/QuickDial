@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('qrForm').addEventListener('submit', handleFormSubmit);
     document.getElementById('downloadPdf').addEventListener('click', downloadPDF);
     document.getElementById('phoneNumber').addEventListener('input', formatPhoneNumber);
+    document.getElementById('name').addEventListener('input', validateNameLength);
 });
 
 function handleFormSubmit(e) {
@@ -34,12 +35,28 @@ function formatPhoneNumber(e) {
     e.target.value = value;
 }
 
+function validateNameLength(e) {
+    const maxLength = 30;
+    let value = e.target.value;
+    
+    if (value.length > maxLength) {
+        e.target.value = value.substring(0, maxLength);
+        showAlert(`Name cannot exceed ${maxLength} characters`, 'warning');
+    }
+}
+
 function generateQRCode() {
     const phoneNumber = document.getElementById('phoneNumber').value.trim();
     const name = document.getElementById('name').value.trim();
     
     if (!phoneNumber) {
         showAlert('Please enter a phone number', 'danger');
+        return;
+    }
+
+    // Validate name length
+    if (name.length > 30) {
+        showAlert('Name cannot exceed 30 characters', 'danger');
         return;
     }
 
