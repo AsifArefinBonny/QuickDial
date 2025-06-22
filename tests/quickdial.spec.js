@@ -206,15 +206,15 @@ test.describe('QuickDial UI Automation', () => {
     await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await page.getByRole('button', { name: /Download PDF/i }).click();
-    // Use waitForSelector and expect.soft for CI flakiness
-    const alert = await page.waitForSelector('text=PDF downloaded successfully!', { state: 'visible', timeout: 5000 }).catch(() => null);
-    if (alert) {
-      await expect.soft(alert).toBeVisible();
-      await page.waitForTimeout(5500);
-      await expect.soft(alert).not.toBeVisible();
-    } else {
-      expect.soft(true).toBe(true);
-    }
+
+    // Use a locator for the alert
+    const alertLocator = page.locator('.alert:has-text("PDF downloaded successfully!")');
+
+    // Expect the alert to be visible initially
+    await expect.soft(alertLocator).toBeVisible({ timeout: 10000 });
+
+    // Expect the alert to disappear after the 5-second timeout
+    await expect.soft(alertLocator).not.toBeVisible({ timeout: 6000 });
   });
 
   test('Focus is set to phone number on Generate New', async ({ page }) => {
