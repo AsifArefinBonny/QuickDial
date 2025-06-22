@@ -280,7 +280,7 @@ async function sharePDF() {
                 if (navigator.canShare({ files: [file] })) {
                     await navigator.share({
                         title: 'QuickDial QR Code',
-                        text: `My parking contact QR code - scan to call ${currentPhoneNumber}`,
+                        text: `My parking contact quick dialing QR code - scan to call ${currentPhoneNumber}`,
                         files: [file]
                     });
                     
