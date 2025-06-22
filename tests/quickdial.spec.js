@@ -5,7 +5,7 @@ const fs = require('fs');
 const pdfParse = require('pdf-parse');
 const jsQR = require('jsqr');
 const { createCanvas, loadImage } = require('canvas');
-const pdfjsLib = require('pdfjs-dist/legacy/build/pdf.js');
+const pdfjsLib = require('pdfjs-dist/legacy/pdf.js');
 
 const APP_URL = 'https://asifarefinbonny.github.io/QuickDial/';
 
