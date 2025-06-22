@@ -271,6 +271,7 @@ body {
     margin-bottom: 30px;
 }
 
+/* QR Code Container */
 .qr-container {
     display: inline-block;
     padding: 30px;
@@ -278,6 +279,15 @@ body {
     border: 3px solid var(--primary-black);
     border-radius: 12px;
     box-shadow: var(--shadow);
+    max-width: 100%;
+}
+.qr-container canvas,
+.qr-container img {
+    max-width: 220px;
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
 }
 
 .action-buttons {
@@ -398,40 +408,54 @@ body {
     border-color: var(--dark-gray);
 }
 
+/* QR Info and Result Title Responsive Text */
+#qrInfo, .alert, .result-title {
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .main-container {
         padding: 15px;
     }
-    
     .section-box {
         padding: 20px;
         margin-bottom: 20px;
     }
-    
     .brand-title {
         font-size: 2rem;
     }
-    
     .instructions-grid {
         grid-template-columns: 1fr;
         gap: 20px;
     }
-    
     .action-buttons {
         grid-template-columns: 1fr;
         gap: 10px;
     }
-    
     .modal-content {
         width: 95%;
         margin: 20px;
     }
-    
     .modal-header,
     .modal-body,
     .modal-footer {
         padding: 20px;
+    }
+    .qr-container {
+        padding: 10px;
+        max-width: 95vw;
+    }
+    .qr-container canvas,
+    .qr-container img {
+        max-width: 160px;
+    }
+    .result-title {
+        font-size: 1.1rem;
+    }
+    #qrInfo, .alert {
+        font-size: 0.95rem;
     }
 }
 
@@ -439,19 +463,30 @@ body {
     .brand-title {
         font-size: 1.8rem;
     }
-    
     .form-title {
         font-size: 1.5rem;
     }
-    
     .btn {
         padding: 10px 20px;
         font-size: 0.9rem;
     }
-    
     .btn-large {
         padding: 15px 25px;
         font-size: 1rem;
+    }
+    .qr-container {
+        padding: 5px;
+        max-width: 99vw;
+    }
+    .qr-container canvas,
+    .qr-container img {
+        max-width: 120px;
+    }
+    .result-title {
+        font-size: 1rem;
+    }
+    #qrInfo, .alert {
+        font-size: 0.9rem;
     }
 }
 
