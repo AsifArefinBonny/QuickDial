@@ -61,16 +61,19 @@ body {
     color: var(--white);
 }
 
-.brand-subtitle {
-    font-size: 1.2rem;
-    margin-bottom: 0;
-    color: var(--light-gray);
+.brand-subtitles {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
-.brand-subtitle-two {
-    font-size: 1.0rem;
-    margin-bottom: 0;
-    color: var(--light-gray);
+.brand-subtitle, .brand-subtitle-two {
+    display: inline;
+    margin: 0;
+    white-space: nowrap;
 }
 
 /* Instructions Section */
@@ -487,6 +490,14 @@ body {
     }
     #qrInfo, .alert {
         font-size: 0.9rem;
+    }
+    .brand-subtitles {
+        gap: 2px;
+    }
+    .brand-subtitle, .brand-subtitle-two {
+        font-size: 0.82rem;
+        line-height: 1.1;
+        padding: 0 1px;
     }
 }
 

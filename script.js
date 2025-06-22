@@ -129,7 +129,7 @@ function generatePDFData() {
         // Add title
         pdf.setFontSize(24);
         try {
-            pdf.setFont('helvetica', 'bold');
+        pdf.setFont('helvetica', 'bold');
         } catch (e) {
             try {
                 pdf.setFont('arial', 'bold');
@@ -142,7 +142,7 @@ function generatePDFData() {
         // Add website
         pdf.setFontSize(12);
         try {
-            pdf.setFont('helvetica', 'normal');
+        pdf.setFont('helvetica', 'normal');
         } catch (e) {
             try {
                 pdf.setFont('arial', 'normal');
@@ -155,7 +155,7 @@ function generatePDFData() {
         // Add instructions
         pdf.setFontSize(14);
         try {
-            pdf.setFont('helvetica', 'bold');
+        pdf.setFont('helvetica', 'bold');
         } catch (e) {
             try {
                 pdf.setFont('arial', 'bold');
@@ -166,7 +166,7 @@ function generatePDFData() {
         pdf.setTextColor(0, 0, 0);
         pdf.text('Instructions:', 20, 60);
         try {
-            pdf.setFont('helvetica', 'normal');
+        pdf.setFont('helvetica', 'normal');
         } catch (e) {
             try {
                 pdf.setFont('arial', 'normal');
@@ -201,7 +201,7 @@ function generatePDFData() {
         // Add instruction text at top
         pdf.setFontSize(14);
         try {
-            pdf.setFont('helvetica', 'bold');
+        pdf.setFont('helvetica', 'bold');
         } catch (e) {
             try {
                 pdf.setFont('arial', 'bold');
@@ -232,7 +232,7 @@ function generatePDFData() {
         // Add contact info below QR code
         pdf.setFontSize(12);
         try {
-            pdf.setFont('helvetica', 'bold');
+        pdf.setFont('helvetica', 'bold');
         } catch (e) {
             try {
                 pdf.setFont('arial', 'bold');
@@ -249,7 +249,7 @@ function generatePDFData() {
         // Add branding at bottom
         pdf.setFontSize(10);
         try {
-            pdf.setFont('helvetica', 'normal');
+        pdf.setFont('helvetica', 'normal');
         } catch (e) {
             try {
                 pdf.setFont('arial', 'normal');
@@ -262,7 +262,7 @@ function generatePDFData() {
         // Add cut instruction below box
         pdf.setFontSize(10);
         try {
-            pdf.setFont('helvetica', 'italic');
+        pdf.setFont('helvetica', 'italic');
         } catch (e) {
             try {
                 pdf.setFont('arial', 'italic');
@@ -275,7 +275,7 @@ function generatePDFData() {
         // Add footer
         pdf.setFontSize(8);
         try {
-            pdf.setFont('helvetica', 'normal');
+        pdf.setFont('helvetica', 'normal');
         } catch (e) {
             try {
                 pdf.setFont('arial', 'normal');
@@ -301,7 +301,7 @@ function downloadPDF() {
     if (pdf) {
         const fileName = `QuickDial-${currentPhoneNumber.replace(/[^0-9]/g, '')}.pdf`;
         pdf.save(fileName);
-        showAlert('PDF downloaded successfully!', 'success');
+        showAlert('PDF downloaded successfully!', 'success', '#resultSection');
         
         // Analytics tracking
         trackEvent('PDF', 'download', fileName);
@@ -346,7 +346,7 @@ async function sharePDF() {
                         files: [file]
                     });
                     
-                    showAlert('PDF shared successfully!', 'success');
+                    showAlert('PDF shared successfully!', 'success', '#resultSection');
                     trackEvent('PDF', 'share_native', fileName);
                     return;
                 }
@@ -359,7 +359,7 @@ async function sharePDF() {
         pdf.save(fileName);
         
         // Show instructional message for sharing
-        showAlert('PDF downloaded! You can now share it via WhatsApp, email, or any app from your device.', 'info');
+        showAlert('PDF downloaded! You can now share it via WhatsApp, email, or any app from your device.', 'info', '#resultSection');
         trackEvent('PDF', 'share_download', fileName);
 
     } catch (error) {
@@ -392,7 +392,7 @@ function toggleInstructions() {
     instructions.classList.toggle('show');
 }
 
-function showAlert(message, type = 'info') {
+function showAlert(message, type = 'info', target = null) {
     // Remove any existing alerts first
     const existingAlerts = document.querySelectorAll('.alert:not(.alert-success)');
     existingAlerts.forEach(alert => alert.remove());
@@ -403,15 +403,20 @@ function showAlert(message, type = 'info') {
         <i class="fas fa-${getAlertIcon(type)}"></i> ${message}
     `;
     
-    // Try multiple fallback locations for inserting the alert
+    // Determine where to insert the alert
+    let container = null;
+    if (target) {
+        container = (typeof target === 'string') ? document.querySelector(target) : target;
+    }
+    
+    if (!container) {
     const formSection = document.querySelector('.form-section');
     const formTitle = document.querySelector('.form-title');
     const qrForm = document.getElementById('qrForm');
     const body = document.body;
-    
     if (formSection && formTitle) {
         // Original approach - insert after form title
-        formSection.insertBefore(alertDiv, formTitle.nextSibling);
+            formSection.insertBefore(alertDiv, formTitle ? formTitle.nextSibling : null);
     } else if (formSection) {
         // Fallback 1 - insert as first child of form section
         formSection.insertBefore(alertDiv, formSection.firstChild);
@@ -421,6 +426,10 @@ function showAlert(message, type = 'info') {
     } else {
         // Fallback 3 - insert at top of body
         body.insertBefore(alertDiv, body.firstChild);
+        }
+    } else {
+        // Insert as first child of the target container
+        container.insertBefore(alertDiv, container.firstChild);
     }
     
     // Auto-remove alert after 5 seconds
