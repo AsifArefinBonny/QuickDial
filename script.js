@@ -380,6 +380,11 @@ function generateNew() {
         block: 'start'
     });
     document.getElementById('phoneNumber').focus();
+    // Always close instructions
+    const instructions = document.getElementById('instructions');
+    if (instructions && instructions.classList.contains('show')) {
+        instructions.classList.remove('show');
+    }
 }
 
 function toggleInstructions() {
