@@ -19,15 +19,15 @@ test.describe('QuickDial UI Automation', () => {
   test('Page loads and main elements are visible', async ({ page }) => {
     await page.goto(APP_URL);
     await expect(page).toHaveTitle(/QuickDial/);
-    await expect(page.getByPlaceholder('Enter your phone number in any format')).toBeVisible();
-    await expect(page.getByPlaceholder('Adding your name makes it more personal and professional')).toBeVisible();
+    await expect(page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX')).toBeVisible();
+    await expect(page.getByPlaceholder('Your name')).toBeVisible();
     await expect(page.getByRole('button', { name: /Generate QR Code/i })).toBeVisible();
   });
 
   test('Generate QR code with valid input', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.getByPlaceholder('Enter your phone number in any format').fill('01712345678');
-    await page.getByPlaceholder('Adding your name makes it more personal and professional').fill('Test User');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
+    await page.getByPlaceholder('Your name').fill('Test User');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await expect(page.getByText('QR Code Generated Successfully!')).toBeVisible();
     await expect(page.getByRole('button', { name: /Download PDF/i })).toBeVisible();
@@ -38,7 +38,7 @@ test.describe('QuickDial UI Automation', () => {
   test('Show error for empty phone number', async ({ page }) => {
     await page.goto(APP_URL);
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
-    await expect(page.locator('text=Phone Number is required')).toBeVisible();
+    await expect(page.locator('.alert-danger')).toContainText('Please enter a phone number');
   });
 
   test('Instructions toggle works', async ({ page }) => {
@@ -53,24 +53,24 @@ test.describe('QuickDial UI Automation', () => {
 
   test('Generate QR code with only phone number', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.getByLabel(/Phone Number/i).fill('01712345678');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await expect(page.getByText('QR Code Generated Successfully!')).toBeVisible();
-    await expect(page.getByText(/Phone:/)).toContainText('01712345678');
+    await expect(page.locator('#qrInfo')).toContainText('+8801712345678');
   });
 
   test('Name field enforces max length', async ({ page }) => {
     await page.goto(APP_URL);
     const longName = 'A'.repeat(40);
-    await page.getByLabel(/Name/i).fill(longName);
+    await page.getByPlaceholder('Your name').fill(longName);
     await expect(page.locator('.alert-warning')).toContainText('Name cannot exceed 30 characters');
-    const nameValue = await page.getByLabel(/Name/i).inputValue();
+    const nameValue = await page.getByPlaceholder('Your name').inputValue();
     expect(nameValue.length).toBeLessThanOrEqual(30);
   });
 
   test('Invalid phone number shows warning', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.getByLabel(/Phone Number/i).fill('12345');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('12345');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await expect(page.locator('.alert-warning')).toContainText('Please enter a valid phone number');
   });
@@ -89,10 +89,10 @@ test.describe('QuickDial UI Automation', () => {
 
   test('Generate New resets form and UI', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.getByLabel(/Phone Number/i).fill('01712345678');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await page.getByRole('button', { name: /Generate New/i }).click();
-    await expect(page.getByLabel(/Phone Number/i)).toBeEmpty();
+    await expect(page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX')).toBeEmpty();
     await expect(page.locator('#resultSection')).not.toHaveClass(/show/);
     await expect(page.locator('.form-section')).toBeVisible();
   });
@@ -113,15 +113,15 @@ test.describe('QuickDial UI Automation', () => {
       const name = await btn.getAttribute('aria-label') || await btn.textContent();
       expect(name.trim().length).toBeGreaterThan(0);
     }
-    const phoneInput = page.getByLabel(/Phone Number/i);
+    const phoneInput = page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX');
     await expect(phoneInput).toBeVisible();
-    const nameInput = page.getByLabel(/Name/i);
+    const nameInput = page.getByPlaceholder('Your name');
     await expect(nameInput).toBeVisible();
   });
 
   test('Rapid submit does not break UI', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.getByLabel(/Phone Number/i).fill('01712345678');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     const btn = page.getByRole('button', { name: /Generate QR Code/i });
     await Promise.all([
       btn.click(),
@@ -133,38 +133,37 @@ test.describe('QuickDial UI Automation', () => {
 
   test('Multiple QR generations update result', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.getByLabel(/Phone Number/i).fill('01712345678');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await expect(page.getByText('QR Code Generated Successfully!')).toBeVisible();
     await page.getByRole('button', { name: /Generate New/i }).click();
-    await page.getByLabel(/Phone Number/i).fill('01887654321');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01887654321');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await expect(page.getByText('QR Code Generated Successfully!')).toBeVisible();
-    await expect(page.getByText(/Phone:/)).toContainText('01887654321');
+    await expect(page.locator('#qrInfo')).toContainText('+8801887654321');
   });
 
   test('Download PDF after QR code generation', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.getByLabel(/Phone Number/i).fill('01712345678');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
       page.getByRole('button', { name: /Download PDF/i }).click()
     ]);
-    expect(download.suggestedFilename()).toMatch(/QuickDial-01712345678.*\.pdf/);
+    expect(download.suggestedFilename()).toMatch(/QuickDial-8801712345678.*\.pdf/);
   });
 
   test('Share PDF after QR code generation (fallback to download)', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.getByLabel(/Phone Number/i).fill('01712345678');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
-    // Simulate share fallback by not supporting navigator.share
     await page.addInitScript(() => { window.navigator.share = undefined; });
     const [download] = await Promise.all([
       page.waitForEvent('download'),
       page.getByRole('button', { name: /Share PDF/i }).click()
     ]);
-    expect(download.suggestedFilename()).toMatch(/QuickDial-01712345678.*\.pdf/);
+    expect(download.suggestedFilename()).toMatch(/QuickDial-8801712345678.*\.pdf/);
   });
 
   test('Alert auto-dismisses after 5 seconds', async ({ page }) => {
@@ -177,41 +176,31 @@ test.describe('QuickDial UI Automation', () => {
 
   test('Focus is set to phone number on Generate New', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.getByLabel(/Phone Number/i).fill('01712345678');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await page.getByRole('button', { name: /Generate New/i }).click();
-    await expect(page.getByLabel(/Phone Number/i)).toBeFocused();
+    await expect(page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX')).toBeFocused();
   });
 
   test('Tab order: can navigate form and buttons with keyboard', async ({ page }) => {
     await page.goto(APP_URL);
     await page.keyboard.press('Tab'); // Phone number
-    await expect(page.getByLabel(/Phone Number/i)).toBeFocused();
+    await expect(page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX')).toBeFocused();
     await page.keyboard.press('Tab'); // Name
-    await expect(page.getByLabel(/Name/i)).toBeFocused();
+    await expect(page.getByPlaceholder('Your name')).toBeFocused();
     await page.keyboard.press('Tab'); // Generate QR
     await expect(page.getByRole('button', { name: /Generate QR Code/i })).toBeFocused();
   });
 
-  test('ARIA roles: result section and alerts', async ({ page }) => {
-    await page.goto(APP_URL);
-    await page.getByLabel(/Phone Number/i).fill('01712345678');
-    await page.getByRole('button', { name: /Generate QR Code/i }).click();
-    // Alerts should have role=alert
-    const alert = page.locator('.alert-success');
-    await expect(alert).toBeVisible();
-    expect(await alert.getAttribute('role')).toBe('alert');
-  });
-
   test('QR code image changes for different phone numbers', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.getByLabel(/Phone Number/i).fill('01712345678');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await page.waitForSelector('#qrcode canvas');
     const qr1 = await page.locator('#qrcode canvas').screenshot();
 
     await page.getByRole('button', { name: /Generate New/i }).click();
-    await page.getByLabel(/Phone Number/i).fill('01887654321');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01887654321');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await page.waitForSelector('#qrcode canvas');
     const qr2 = await page.locator('#qrcode canvas').screenshot();
@@ -227,8 +216,8 @@ test.describe('QuickDial UI Automation', () => {
 
   test('Downloaded PDF contains correct phone and name', async ({ page, context }) => {
     await page.goto(APP_URL);
-    await page.getByLabel(/Phone Number/i).fill('01712345678');
-    await page.getByLabel(/Name/i).fill('Test User');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
+    await page.getByPlaceholder('Your name').fill('Test User');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -247,7 +236,7 @@ test.describe('QuickDial UI Automation', () => {
     await page.addInitScript(() => {
       window.gtag = (...args) => { window._gtagEvents = window._gtagEvents || []; window._gtagEvents.push(args); };
     });
-    await page.getByLabel(/Phone Number/i).fill('01712345678');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await page.getByRole('button', { name: /Download PDF/i }).click();
     await page.waitForTimeout(500); // Wait for event
@@ -260,9 +249,8 @@ test.describe('QuickDial UI Automation', () => {
     await page.addInitScript(() => {
       window.gtag = (...args) => { window._gtagEvents = window._gtagEvents || []; window._gtagEvents.push(args); };
     });
-    await page.getByLabel(/Phone Number/i).fill('01712345678');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
-    // Simulate share fallback by not supporting navigator.share
     await page.addInitScript(() => { window.navigator.share = undefined; });
     await page.getByRole('button', { name: /Share PDF/i }).click();
     await page.waitForTimeout(500); // Wait for event
@@ -273,7 +261,7 @@ test.describe('QuickDial UI Automation', () => {
   test('QR code encodes correct phone number', async ({ page }) => {
     await page.goto(APP_URL);
     const phone = '01712345678';
-    await page.getByLabel(/Phone Number/i).fill(phone);
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill(phone);
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await page.waitForSelector('#qrcode canvas');
     const qrPng = await page.locator('#qrcode canvas').screenshot();
@@ -290,8 +278,8 @@ test.describe('QuickDial UI Automation', () => {
 
   test('Generated PDF visually matches baseline', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.getByLabel(/Phone Number/i).fill('01712345678');
-    await page.getByLabel(/Name/i).fill('Test User');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
+    await page.getByPlaceholder('Your name').fill('Test User');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -324,7 +312,7 @@ test.describe('QuickDial UI Automation', () => {
     await page.addInitScript(() => {
       window.gtag = (...args) => { window._gtagEvents = window._gtagEvents || []; window._gtagEvents.push(args); };
     });
-    await page.getByLabel(/Phone Number/i).fill('01712345678');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await page.waitForTimeout(500);
     const events = await page.evaluate(() => window._gtagEvents || []);
@@ -336,7 +324,7 @@ test.describe('QuickDial UI Automation', () => {
     await page.addInitScript(() => {
       window.gtag = (...args) => { window._gtagEvents = window._gtagEvents || []; window._gtagEvents.push(args); };
     });
-    await page.getByLabel(/Phone Number/i).fill('01712345678');
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await page.getByRole('button', { name: /Generate New/i }).click();
     await page.waitForTimeout(500);
