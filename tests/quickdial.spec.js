@@ -5,9 +5,13 @@ const fs = require('fs');
 const pdfParse = require('pdf-parse');
 const jsQR = require('jsqr');
 const { createCanvas, loadImage } = require('canvas');
-const pdfjsLib = require('pdfjs-dist/legacy/pdf.js');
+let pdfjsLib;
 
 const APP_URL = 'https://asifarefinbonny.github.io/QuickDial/';
+
+beforeAll(async () => {
+  pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+});
 
 test.describe('QuickDial UI Automation', () => {
   test('Page loads and main elements are visible', async ({ page }) => {
@@ -295,7 +299,7 @@ test.describe('QuickDial UI Automation', () => {
     await download.saveAs(pdfPath);
     // Render first page of PDF to PNG
     const data = fs.readFileSync(pdfPath);
-    const pdf = await pdfjsLib.getDocument({ data }).promise;
+    const pdf = await pdfjsLib.default.getDocument({ data }).promise;
     const page1 = await pdf.getPage(1);
     const viewport = page1.getViewport({ scale: 2 });
     const canvas = createCanvas(viewport.width, viewport.height);
