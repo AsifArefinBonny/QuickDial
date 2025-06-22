@@ -5,6 +5,8 @@ const fs = require('fs');
 const pdfParse = require('pdf-parse');
 const jsQR = require('jsqr');
 const { createCanvas, loadImage } = require('canvas');
+const os = require('os');
+const path = require('path');
 let pdfjsLib;
 
 const APP_URL = 'https://asifarefinbonny.github.io/QuickDial/';
@@ -223,7 +225,7 @@ test.describe('QuickDial UI Automation', () => {
     expect(numDiffPixels).toBeGreaterThan(0); // Images should differ
   });
 
-  test('Downloaded PDF contains correct phone and name', async ({ page, context, tmpPath }) => {
+  test('Downloaded PDF contains correct phone and name', async ({ page, context }) => {
     await page.goto(APP_URL);
     await page.getByLabel(/Phone Number/i).fill('01712345678');
     await page.getByLabel(/Name/i).fill('Test User');
@@ -232,7 +234,7 @@ test.describe('QuickDial UI Automation', () => {
       page.waitForEvent('download'),
       page.getByRole('button', { name: /Download PDF/i }).click()
     ]);
-    const pdfPath = tmpPath + '/test.pdf';
+    const pdfPath = path.join(os.tmpdir(), `test-${Date.now()}.pdf`);
     await download.saveAs(pdfPath);
     const data = fs.readFileSync(pdfPath);
     const pdfData = await pdfParse(data);
@@ -286,7 +288,7 @@ test.describe('QuickDial UI Automation', () => {
     expect(code.data).toContain(phone.replace(/\D/g, ''));
   });
 
-  test('Generated PDF visually matches baseline', async ({ page, tmpPath }) => {
+  test('Generated PDF visually matches baseline', async ({ page }) => {
     await page.goto(APP_URL);
     await page.getByLabel(/Phone Number/i).fill('01712345678');
     await page.getByLabel(/Name/i).fill('Test User');
@@ -295,7 +297,7 @@ test.describe('QuickDial UI Automation', () => {
       page.waitForEvent('download'),
       page.getByRole('button', { name: /Download PDF/i }).click()
     ]);
-    const pdfPath = tmpPath + '/test.pdf';
+    const pdfPath = path.join(os.tmpdir(), `test-${Date.now()}.pdf`);
     await download.saveAs(pdfPath);
     // Render first page of PDF to PNG
     const data = fs.readFileSync(pdfPath);
