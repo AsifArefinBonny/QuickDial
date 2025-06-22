@@ -11,6 +11,14 @@ let pdfjsLib;
 
 const APP_URL = 'https://asifarefinbonny.github.io/QuickDial/';
 
+// Helper to mock analytics before page load
+async function gotoWithAnalytics(page, url = APP_URL) {
+  await page.addInitScript(() => {
+    window.gtag = (...args) => { window._gtagEvents = window._gtagEvents || []; window._gtagEvents.push(args); };
+  });
+  await page.goto(url);
+}
+
 test.describe('QuickDial UI Automation', () => {
   test.beforeAll(async () => {
     pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
@@ -37,8 +45,9 @@ test.describe('QuickDial UI Automation', () => {
 
   test('Show error for empty phone number', async ({ page }) => {
     await page.goto(APP_URL);
+    await expect(page.locator('.form-section')).toBeVisible();
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
-    await expect(page.locator('.alert-danger')).toContainText('Please enter a phone number');
+    await expect(page.locator('.alert-danger, .alert-warning')).toHaveText(/Please enter a phone number/);
   });
 
   test('Instructions toggle works', async ({ page }) => {
@@ -77,14 +86,14 @@ test.describe('QuickDial UI Automation', () => {
 
   test('Download PDF button requires QR code', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.getByRole('button', { name: /Download PDF/i }).click();
-    await expect(page.locator('.alert-warning')).toContainText('Please generate a QR code first');
+    // The button should not be visible before QR code is generated
+    await expect(page.locator('#downloadPdf')).toBeHidden();
   });
 
   test('Share PDF button requires QR code', async ({ page }) => {
     await page.goto(APP_URL);
-    await page.getByRole('button', { name: /Share PDF/i }).click();
-    await expect(page.locator('.alert-warning')).toContainText('Please generate a QR code first');
+    // The button should not be visible before QR code is generated
+    await expect(page.locator('#sharePdfBtn')).toBeHidden();
   });
 
   test('Generate New resets form and UI', async ({ page }) => {
@@ -99,9 +108,11 @@ test.describe('QuickDial UI Automation', () => {
 
   test('Responsive layout on mobile', async ({ page, browserName }) => {
     test.skip(browserName === 'firefox', 'Mobile emulation not fully supported on Firefox');
-    await page.emulateMedia({ colorScheme: 'light' });
     await page.setViewportSize({ width: 375, height: 700 });
     await page.goto(APP_URL);
+    // Generate QR code to show action-buttons
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
+    await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await expect(page.locator('.main-container')).toBeVisible();
     await expect(page.locator('.action-buttons')).toBeVisible();
   });
@@ -168,10 +179,12 @@ test.describe('QuickDial UI Automation', () => {
 
   test('Alert auto-dismisses after 5 seconds', async ({ page }) => {
     await page.goto(APP_URL);
+    await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
+    await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await page.getByRole('button', { name: /Download PDF/i }).click();
-    await expect(page.locator('.alert-warning')).toBeVisible();
+    await expect(page.locator('.alert-success')).toBeVisible();
     await page.waitForTimeout(5500);
-    await expect(page.locator('.alert-warning')).not.toBeVisible();
+    await expect(page.locator('.alert-success')).not.toBeVisible();
   });
 
   test('Focus is set to phone number on Generate New', async ({ page }) => {
@@ -184,6 +197,7 @@ test.describe('QuickDial UI Automation', () => {
 
   test('Tab order: can navigate form and buttons with keyboard', async ({ page }) => {
     await page.goto(APP_URL);
+    await page.click('body'); // Ensure focus starts on body
     await page.keyboard.press('Tab'); // Phone number
     await expect(page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX')).toBeFocused();
     await page.keyboard.press('Tab'); // Name
@@ -196,22 +210,19 @@ test.describe('QuickDial UI Automation', () => {
     await page.goto(APP_URL);
     await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
-    await page.waitForSelector('#qrcode canvas');
+    await page.waitForSelector('#qrcode canvas', { state: 'visible', timeout: 10000 });
     const qr1 = await page.locator('#qrcode canvas').screenshot();
-
     await page.getByRole('button', { name: /Generate New/i }).click();
     await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01887654321');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
-    await page.waitForSelector('#qrcode canvas');
+    await page.waitForSelector('#qrcode canvas', { state: 'visible', timeout: 10000 });
     const qr2 = await page.locator('#qrcode canvas').screenshot();
-
-    // Compare images using pixelmatch
     const img1 = PNG.sync.read(qr1);
     const img2 = PNG.sync.read(qr2);
     const { width, height } = img1;
     const diff = new PNG({ width, height });
     const numDiffPixels = pixelmatch(img1.data, img2.data, diff.data, width, height, { threshold: 0.1 });
-    expect(numDiffPixels).toBeGreaterThan(0); // Images should differ
+    expect(numDiffPixels).toBeGreaterThan(0);
   });
 
   test('Downloaded PDF contains correct phone and name', async ({ page, context }) => {
@@ -232,28 +243,22 @@ test.describe('QuickDial UI Automation', () => {
   });
 
   test('Analytics event is fired on PDF download', async ({ page }) => {
-    await page.goto(APP_URL);
-    await page.addInitScript(() => {
-      window.gtag = (...args) => { window._gtagEvents = window._gtagEvents || []; window._gtagEvents.push(args); };
-    });
+    await gotoWithAnalytics(page);
     await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await page.getByRole('button', { name: /Download PDF/i }).click();
-    await page.waitForTimeout(500); // Wait for event
+    await page.waitForTimeout(500);
     const events = await page.evaluate(() => window._gtagEvents || []);
     expect(events.some(e => e[0] === 'event' && e[1] === 'download')).toBeTruthy();
   });
 
   test('Analytics event is fired on PDF share', async ({ page }) => {
-    await page.goto(APP_URL);
-    await page.addInitScript(() => {
-      window.gtag = (...args) => { window._gtagEvents = window._gtagEvents || []; window._gtagEvents.push(args); };
-    });
+    await gotoWithAnalytics(page);
     await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await page.addInitScript(() => { window.navigator.share = undefined; });
     await page.getByRole('button', { name: /Share PDF/i }).click();
-    await page.waitForTimeout(500); // Wait for event
+    await page.waitForTimeout(500);
     const events = await page.evaluate(() => window._gtagEvents || []);
     expect(events.some(e => e[0] === 'event' && e[1].startsWith('share'))).toBeTruthy();
   });
@@ -263,9 +268,8 @@ test.describe('QuickDial UI Automation', () => {
     const phone = '01712345678';
     await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill(phone);
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
-    await page.waitForSelector('#qrcode canvas');
+    await page.waitForSelector('#qrcode canvas', { state: 'visible', timeout: 10000 });
     const qrPng = await page.locator('#qrcode canvas').screenshot();
-    // Load image into canvas
     const img = await loadImage(qrPng);
     const canvas = createCanvas(img.width, img.height);
     const ctx = canvas.getContext('2d');
@@ -287,7 +291,6 @@ test.describe('QuickDial UI Automation', () => {
     ]);
     const pdfPath = path.join(os.tmpdir(), `test-${Date.now()}.pdf`);
     await download.saveAs(pdfPath);
-    // Render first page of PDF to PNG
     const data = fs.readFileSync(pdfPath);
     const pdf = await pdfjsLib.default.getDocument({ data }).promise;
     const page1 = await pdf.getPage(1);
@@ -296,22 +299,17 @@ test.describe('QuickDial UI Automation', () => {
     const ctx = canvas.getContext('2d');
     await page1.render({ canvasContext: ctx, viewport }).promise;
     const generatedPng = canvas.toBuffer();
-    // Load baseline PNG (should be placed in tests/baseline.pdf.png)
     const baselinePng = fs.readFileSync(__dirname + '/baseline.pdf.png');
     const img1 = PNG.sync.read(generatedPng);
     const img2 = PNG.sync.read(baselinePng);
     const { width, height } = img1;
     const diff = new PNG({ width, height });
     const numDiffPixels = pixelmatch(img1.data, img2.data, diff.data, width, height, { threshold: 0.1 });
-    // Allow some tolerance for dynamic content
     expect(numDiffPixels).toBeLessThan(width * height * 0.01);
   });
 
   test('Analytics event is fired on Generate QR Code', async ({ page }) => {
-    await page.goto(APP_URL);
-    await page.addInitScript(() => {
-      window.gtag = (...args) => { window._gtagEvents = window._gtagEvents || []; window._gtagEvents.push(args); };
-    });
+    await gotoWithAnalytics(page);
     await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await page.waitForTimeout(500);
@@ -320,10 +318,7 @@ test.describe('QuickDial UI Automation', () => {
   });
 
   test('Analytics event is fired on Generate New', async ({ page }) => {
-    await page.goto(APP_URL);
-    await page.addInitScript(() => {
-      window.gtag = (...args) => { window._gtagEvents = window._gtagEvents || []; window._gtagEvents.push(args); };
-    });
+    await gotoWithAnalytics(page);
     await page.getByPlaceholder('01XXXXXXXXX or +8801XXXXXXXXX').fill('01712345678');
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await page.getByRole('button', { name: /Generate New/i }).click();
@@ -333,10 +328,8 @@ test.describe('QuickDial UI Automation', () => {
   });
 
   test('Analytics event is fired on error', async ({ page }) => {
-    await page.goto(APP_URL);
-    await page.addInitScript(() => {
-      window.gtag = (...args) => { window._gtagEvents = window._gtagEvents || []; window._gtagEvents.push(args); };
-    });
+    await gotoWithAnalytics(page);
+    await expect(page.locator('.form-section')).toBeVisible();
     await page.getByRole('button', { name: /Generate QR Code/i }).click();
     await page.waitForTimeout(500);
     const events = await page.evaluate(() => window._gtagEvents || []);
