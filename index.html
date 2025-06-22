@@ -56,7 +56,7 @@
                                 <li><strong>Add Name (Optional):</strong> Include your name for personal touch</li>
                                 <li><strong>Generate QR Code:</strong> Click the blue button to create your QR</li>
                                 <li><strong>Download PDF:</strong> Get a printable version for your car</li>
-                                <li><strong>Email PDF:</strong> Email the PDF for printing</li>
+                                <li><strong>Share PDF:</strong> Share the PDF via WhatsApp, email, or any app</li>
                                 <li><strong>Placement:</strong> Place or paste it on your car's windshield where it's visible</li>
                             </ol>
                         </div>
@@ -111,8 +111,8 @@
                 <button id="downloadPdf" class="btn btn-success btn-large">
                     <i class="fas fa-download"></i> Download PDF
                 </button>
-                <button id="emailBtn" class="btn btn-info btn-large" onclick="openEmailModal()">
-                    <i class="fas fa-envelope"></i> Email PDF
+                <button id="sharePdfBtn" class="btn btn-info btn-large" onclick="sharePDF()">
+                    <i class="fas fa-share-alt"></i> Share PDF
                 </button>
                 <button id="generateNew" class="btn btn-outline btn-large" onclick="generateNew()">
                     <i class="fas fa-plus"></i> Generate New
@@ -127,37 +127,8 @@
         </div>
     </div>
 
-    <!-- Email Modal -->
-    <div class="modal-overlay" id="emailModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title"><i class="fas fa-envelope"></i> Send QR Code via Email</h3>
-                <button class="modal-close" onclick="closeEmailModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="emailAddress" class="form-label">Email Address</label>
-                    <input type="email" class="form-control" id="emailAddress" 
-                           placeholder="recipient@example.com" required>
-                </div>
-                <div class="form-group">
-                    <label for="emailMessage" class="form-label">Message (Optional)</label>
-                    <textarea class="form-control" id="emailMessage" rows="4" 
-                              placeholder="Your QR code for easy parking contact is attached."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeEmailModal()">Cancel</button>
-                <button class="btn btn-primary" id="sendEmailBtn" onclick="sendEmail()">
-                    <i class="fas fa-paper-plane"></i> Send Email
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
-    <script src="https://smtpjs.com/v3/smtp.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

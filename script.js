@@ -1,11 +1,3 @@
-// Configuration
-const SMTP_CONFIG = {
-    Host: "smtp.gmail.com",
-    Username: "your-email@gmail.com",
-    Password: "your-app-password",
-    Port: 587
-};
-
 let currentQRCode = null;
 let currentPhoneNumber = '';
 let currentName = '';
@@ -123,10 +115,9 @@ function showResult() {
     });
 }
 
-function downloadPDF() {
+function generatePDFData() {
     if (!currentQRCode) {
-        showAlert('Please generate a QR code first', 'warning');
-        return;
+        return null;
     }
 
     try {
@@ -230,14 +221,91 @@ function downloadPDF() {
         pdf.text('This QR code makes parking easier in Bangladesh - no more typing phone numbers!', 
                  pageWidth/2, pageHeight - 20, { align: 'center' });
         
-        // Save PDF
-        pdf.save(`QuickDial-${currentPhoneNumber.replace(/[^0-9]/g, '')}.pdf`);
-        
-        showAlert('PDF downloaded successfully!', 'success');
+        return pdf;
         
     } catch (error) {
-        console.error('PDF Error:', error);
+        console.error('PDF Generation Error:', error);
+        return null;
+    }
+}
+
+function downloadPDF() {
+    if (!currentQRCode) {
+        showAlert('Please generate a QR code first', 'warning');
+        return;
+    }
+
+    const pdf = generatePDFData();
+    if (pdf) {
+        const fileName = `QuickDial-${currentPhoneNumber.replace(/[^0-9]/g, '')}.pdf`;
+        pdf.save(fileName);
+        showAlert('PDF downloaded successfully!', 'success');
+        
+        // Analytics tracking
+        trackEvent('PDF', 'download', fileName);
+    } else {
         showAlert('Error generating PDF. Please try again.', 'danger');
+    }
+}
+
+async function sharePDF() {
+    if (!currentQRCode) {
+        showAlert('Please generate a QR code first', 'warning');
+        return;
+    }
+
+    const shareBtn = document.getElementById('sharePdfBtn');
+    const originalText = shareBtn.innerHTML;
+    shareBtn.disabled = true;
+    shareBtn.innerHTML = '<span class="spinner"></span>Preparing...';
+
+    try {
+        const pdf = generatePDFData();
+        if (!pdf) {
+            throw new Error('Failed to generate PDF');
+        }
+
+        const fileName = `QuickDial-${currentPhoneNumber.replace(/[^0-9]/g, '')}.pdf`;
+        const pdfBase64 = pdf.output('datauristring');
+
+        // Check if Web Share API is supported and can share files
+        if (navigator.share && navigator.canShare) {
+            try {
+                // Convert base64 to blob
+                const response = await fetch(pdfBase64);
+                const blob = await response.blob();
+                const file = new File([blob], fileName, { type: 'application/pdf' });
+
+                // Check if we can share this file
+                if (navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: 'QuickDial QR Code',
+                        text: `My parking contact QR code - scan to call ${currentPhoneNumber}`,
+                        files: [file]
+                    });
+                    
+                    showAlert('PDF shared successfully!', 'success');
+                    trackEvent('PDF', 'share_native', fileName);
+                    return;
+                }
+            } catch (shareError) {
+                console.log('Native sharing failed, falling back to download:', shareError);
+            }
+        }
+
+        // Fallback: Download the file
+        pdf.save(fileName);
+        
+        // Show instructional message for sharing
+        showAlert('PDF downloaded! You can now share it via WhatsApp, email, or any app from your device.', 'info');
+        trackEvent('PDF', 'share_download', fileName);
+
+    } catch (error) {
+        console.error('Share PDF Error:', error);
+        showAlert('Error preparing PDF for sharing. Please try again.', 'danger');
+    } finally {
+        shareBtn.disabled = false;
+        shareBtn.innerHTML = originalText;
     }
 }
 
@@ -254,65 +322,6 @@ function generateNew() {
 function toggleInstructions() {
     const instructions = document.getElementById('instructions');
     instructions.classList.toggle('show');
-}
-
-function openEmailModal() {
-    if (!currentQRCode) {
-        showAlert('Please generate a QR code first', 'warning');
-        return;
-    }
-    document.getElementById('emailModal').classList.add('show');
-}
-
-function closeEmailModal() {
-    document.getElementById('emailModal').classList.remove('show');
-}
-
-async function sendEmail() {
-    const emailAddress = document.getElementById('emailAddress').value.trim();
-    const emailMessage = document.getElementById('emailMessage').value.trim();
-    
-    if (!emailAddress) {
-        showAlert('Please enter an email address', 'warning');
-        return;
-    }
-
-    const sendBtn = document.getElementById('sendEmailBtn');
-    const originalText = sendBtn.innerHTML;
-    sendBtn.disabled = true;
-    sendBtn.innerHTML = '<span class="spinner"></span>Sending...';
-
-    try {
-        // Generate PDF as base64 (same logic as download but return as base64)
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('portrait', 'mm', 'a4');
-        
-        // Same PDF generation code as downloadPDF function
-        // ... (PDF generation code here)
-        
-        const pdfBase64 = pdf.output('datauristring').split(',')[1];
-
-        await Email.send({
-            ...SMTP_CONFIG,
-            To: emailAddress,
-            Subject: "Your QuickDial QR Code",
-            Body: emailMessage || `Your QuickDial QR code is attached. Print and place on your car windshield for easy parking contact.`,
-            Attachments: [{
-                name: `QuickDial-${currentPhoneNumber.replace(/[^0-9]/g, '')}.pdf`,
-                data: pdfBase64
-            }]
-        });
-
-        showAlert('Email sent successfully!', 'success');
-        closeEmailModal();
-        
-    } catch (error) {
-        console.error('Email error:', error);
-        showAlert('Failed to send email. Please check your configuration.', 'danger');
-    } finally {
-        sendBtn.disabled = false;
-        sendBtn.innerHTML = originalText;
-    }
 }
 
 function showAlert(message, type = 'info') {
@@ -373,10 +382,3 @@ function trackEvent(category, action, label) {
         });
     }
 }
-
-// Close modal when clicking outside
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('modal-overlay')) {
-        closeEmailModal();
-    }
-});
