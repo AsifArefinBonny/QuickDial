@@ -39,7 +39,7 @@ body {
 /* All sections with consistent boxed design */
 .section-box {
     background: var(--white);
-    border: 2px solid var(--border-gray);
+    border: 1px solid var(--border-gray);
     border-radius: 12px;
     padding: 30px;
     margin-bottom: 30px;
@@ -51,7 +51,7 @@ body {
     text-align: center;
     background: var(--primary-black);
     color: var(--white);
-    border: 2px solid var(--primary-black);
+    border: 1px solid var(--primary-black);
 }
 
 .brand-title {
@@ -151,7 +151,7 @@ body {
 .form-control {
     width: 100%;
     padding: 15px 18px;
-    border: 2px solid var(--border-gray);
+    border: 1px solid var(--border-gray);
     border-radius: 8px;
     font-size: 1.1rem;
     background: var(--white);
@@ -232,7 +232,7 @@ body {
 .btn-outline {
     background-color: transparent;
     color: var(--primary-black);
-    border: 2px solid var(--border-gray);
+    border: 1px solid var(--border-gray);
 }
 
 .btn-outline:hover {
@@ -244,7 +244,7 @@ body {
 /* Result Section */
 .result-section {
     border-color: var(--success-green);
-    border-width: 3px;
+    border-width: 1.5px;
     display: none;
 }
 
@@ -256,7 +256,7 @@ body {
     text-align: center;
     margin-bottom: 30px;
     padding-bottom: 20px;
-    border-bottom: 2px solid var(--border-gray);
+    border-bottom: 1px solid var(--border-gray);
 }
 
 .result-title {
@@ -276,7 +276,7 @@ body {
     display: inline-block;
     padding: 30px;
     background: var(--white);
-    border: 3px solid var(--primary-black);
+    border: 2px solid var(--primary-black);
     border-radius: 12px;
     box-shadow: var(--shadow);
     max-width: 100%;
