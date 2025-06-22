@@ -109,6 +109,7 @@ function updateQRInfo() {
 
 function showResult() {
     document.getElementById('resultSection').classList.add('show');
+    document.querySelector('.form-section').style.display = 'none';
     document.getElementById('resultSection').scrollIntoView({ 
         behavior: 'smooth',
         block: 'center'
@@ -312,6 +313,7 @@ async function sharePDF() {
 function generateNew() {
     document.getElementById('qrForm').reset();
     document.getElementById('resultSection').classList.remove('show');
+    document.querySelector('.form-section').style.display = '';
     document.getElementById('qrForm').scrollIntoView({ 
         behavior: 'smooth',
         block: 'start'
