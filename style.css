@@ -67,6 +67,12 @@ body {
     color: var(--light-gray);
 }
 
+.brand-subtitle-two {
+    font-size: 1.0rem;
+    margin-bottom: 0;
+    color: var(--light-gray);
+}
+
 /* Instructions Section */
 .instructions-section {
     border-color: var(--dark-gray);
