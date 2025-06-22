@@ -138,7 +138,7 @@ function generatePDFData() {
         pdf.setFontSize(12);
         pdf.setFont('helvetica', 'normal');
         pdf.setTextColor(100, 100, 100);
-        pdf.text('Generated at: quickdial.github.io', pageWidth/2, 40, { align: 'center' });
+        pdf.text('Generated at: asifarefinbonny.github.io/QuickDial', pageWidth/2, 40, { align: 'center' });
         
         // Add instructions
         pdf.setFontSize(14);
@@ -206,7 +206,7 @@ function generatePDFData() {
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'normal');
         pdf.setTextColor(100, 100, 100);
-        pdf.text('Generate your code at quickdial.github.io', boxX + boxWidth/2, boxY + (currentName ? 105 : 100), { align: 'center' });
+        pdf.text('Generate your code at: asifarefinbonny.github.io/QuickDial', boxX + boxWidth/2, boxY + (currentName ? 105 : 100), { align: 'center' });
         
         // Add cut instruction below box
         pdf.setFontSize(10);
@@ -218,7 +218,7 @@ function generatePDFData() {
         // Add footer
         pdf.setFontSize(8);
         pdf.setFont('helvetica', 'normal');
-        pdf.text('This QR code makes parking easier in Bangladesh - no more typing phone numbers!', 
+        pdf.text('This QR code makes contact dialing easier - no more typing phone numbers!', 
                  pageWidth/2, pageHeight - 20, { align: 'center' });
         
         return pdf;
