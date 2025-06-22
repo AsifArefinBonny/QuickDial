@@ -9,11 +9,11 @@ let pdfjsLib;
 
 const APP_URL = 'https://asifarefinbonny.github.io/QuickDial/';
 
-beforeAll(async () => {
-  pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
-});
-
 test.describe('QuickDial UI Automation', () => {
+  test.beforeAll(async () => {
+    pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+  });
+
   test('Page loads and main elements are visible', async ({ page }) => {
     await page.goto(APP_URL);
     await expect(page).toHaveTitle(/QuickDial/);
