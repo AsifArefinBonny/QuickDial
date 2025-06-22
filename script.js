@@ -129,34 +129,50 @@ function generatePDFData() {
         // Add title
         pdf.setFontSize(24);
         try {
-            pdf.setFont('times', 'bold');
+            pdf.setFont('helvetica', 'bold');
         } catch (e) {
-            pdf.setFont('courier', 'bold');
+            try {
+                pdf.setFont('arial', 'bold');
+            } catch (e2) {
+                pdf.setFont('sans-serif', 'bold');
+            }
         }
         pdf.setTextColor(0, 0, 0);
         pdf.text('QuickDial - Parking Contact QR Code', pageWidth/2, 30, { align: 'center' });
         // Add website
         pdf.setFontSize(12);
         try {
-            pdf.setFont('times', 'normal');
+            pdf.setFont('helvetica', 'normal');
         } catch (e) {
-            pdf.setFont('courier', 'normal');
+            try {
+                pdf.setFont('arial', 'normal');
+            } catch (e2) {
+                pdf.setFont('sans-serif', 'normal');
+            }
         }
         pdf.setTextColor(100, 100, 100);
         pdf.text('Generated at: asifarefinbonny.github.io/QuickDial', pageWidth/2, 40, { align: 'center' });
         // Add instructions
         pdf.setFontSize(14);
         try {
-            pdf.setFont('times', 'bold');
+            pdf.setFont('helvetica', 'bold');
         } catch (e) {
-            pdf.setFont('courier', 'bold');
+            try {
+                pdf.setFont('arial', 'bold');
+            } catch (e2) {
+                pdf.setFont('sans-serif', 'bold');
+            }
         }
         pdf.setTextColor(0, 0, 0);
         pdf.text('Instructions:', 20, 60);
         try {
-            pdf.setFont('times', 'normal');
+            pdf.setFont('helvetica', 'normal');
         } catch (e) {
-            pdf.setFont('courier', 'normal');
+            try {
+                pdf.setFont('arial', 'normal');
+            } catch (e2) {
+                pdf.setFont('sans-serif', 'normal');
+            }
         }
         pdf.setFontSize(12);
         const instructions = [
@@ -185,27 +201,44 @@ function generatePDFData() {
         // Add instruction text at top
         pdf.setFontSize(14);
         try {
-            pdf.setFont('times', 'bold');
+            pdf.setFont('helvetica', 'bold');
         } catch (e) {
-            pdf.setFont('courier', 'bold');
+            try {
+                pdf.setFont('arial', 'bold');
+            } catch (e2) {
+                pdf.setFont('sans-serif', 'bold');
+            }
         }
         pdf.setTextColor(0, 0, 0);
         pdf.text('Please scan the QR to call.', boxX + boxWidth/2, boxY + 15, { align: 'center' });
         // Add QR code in center
+        let qrImageData = null;
+        let qrSize = 45; // Increased size for better scanning
+        let qrX = boxX + (boxWidth - qrSize) / 2; // Center horizontally
+        let qrY = boxY + 25; // Position below instruction text
         const qrCanvas = document.querySelector('#qrcode canvas');
         if (qrCanvas && qrCanvas.offsetParent !== null) {
-            const qrImageData = qrCanvas.toDataURL('image/png');
-            const qrSize = 45; // Increased size for better scanning
-            const qrX = boxX + (boxWidth - qrSize) / 2; // Center horizontally
-            const qrY = boxY + 25; // Position below instruction text
+            qrImageData = qrCanvas.toDataURL('image/png');
+        } else {
+            // Try <img> fallback
+            const qrImg = document.querySelector('#qrcode img');
+            if (qrImg && qrImg.src && qrImg.offsetParent !== null) {
+                qrImageData = qrImg.src;
+            }
+        }
+        if (qrImageData) {
             pdf.addImage(qrImageData, 'PNG', qrX, qrY, qrSize, qrSize);
         }
         // Add contact info below QR code
         pdf.setFontSize(12);
         try {
-            pdf.setFont('times', 'bold');
+            pdf.setFont('helvetica', 'bold');
         } catch (e) {
-            pdf.setFont('courier', 'bold');
+            try {
+                pdf.setFont('arial', 'bold');
+            } catch (e2) {
+                pdf.setFont('sans-serif', 'bold');
+            }
         }
         if (currentName) {
             pdf.text(`Name: ${currentName}`, boxX + boxWidth/2, boxY + 82, { align: 'center' });
@@ -216,27 +249,39 @@ function generatePDFData() {
         // Add branding at bottom
         pdf.setFontSize(10);
         try {
-            pdf.setFont('times', 'normal');
+            pdf.setFont('helvetica', 'normal');
         } catch (e) {
-            pdf.setFont('courier', 'normal');
+            try {
+                pdf.setFont('arial', 'normal');
+            } catch (e2) {
+                pdf.setFont('sans-serif', 'normal');
+            }
         }
         pdf.setTextColor(100, 100, 100);
         pdf.text('Generate your code at: asifarefinbonny.github.io/QuickDial', boxX + boxWidth/2, boxY + (currentName ? 105 : 100), { align: 'center' });
         // Add cut instruction below box
         pdf.setFontSize(10);
         try {
-            pdf.setFont('times', 'italic');
+            pdf.setFont('helvetica', 'italic');
         } catch (e) {
-            pdf.setFont('courier', 'italic');
+            try {
+                pdf.setFont('arial', 'italic');
+            } catch (e2) {
+                pdf.setFont('sans-serif', 'italic');
+            }
         }
         pdf.setTextColor(100, 100, 100);
         pdf.text('\u2702 Cut along the dashed line above and place on your car windshield', pageWidth/2, boxY + boxHeight + 15, { align: 'right' });
         // Add footer
         pdf.setFontSize(8);
         try {
-            pdf.setFont('times', 'normal');
+            pdf.setFont('helvetica', 'normal');
         } catch (e) {
-            pdf.setFont('courier', 'normal');
+            try {
+                pdf.setFont('arial', 'normal');
+            } catch (e2) {
+                pdf.setFont('sans-serif', 'normal');
+            }
         }
         pdf.text('This QR code makes contact dialing easier - no more typing phone numbers!', pageWidth/2, pageHeight - 20, { align: 'center' });
         return pdf;
