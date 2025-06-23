@@ -83,7 +83,7 @@ body {
 
 .instructions-toggle {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 0px;
 }
 
 .instructions-content {
@@ -498,6 +498,11 @@ body {
         font-size: 0.82rem;
         line-height: 1.1;
         padding: 0 1px;
+    }
+    .form-text {
+        color: var(--medium-gray);
+        font-size: 0.7rem;
+        margin-top: 5px;
     }
 }
 
